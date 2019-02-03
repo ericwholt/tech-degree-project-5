@@ -12,14 +12,14 @@ function checkStatus(response) {
     }
 }
 
-function fetchData(url) {
+function fetchRandomUser(url) {
     return fetch(url)
         .then(checkStatus)
         .then(res => res.json())
         .catch(error => console.log('Looks like there was a problem!', error))
 }
 
-fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,DOB&nat=us&noinfo')
+fetchRandomUser('https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,DOB&nat=us&noinfo')
     .then(data => {
         userData = data.results;
         generateSearch();
@@ -34,7 +34,8 @@ fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location
             $(`#${currentModal}`).show();
         });
         $('.modal').on('click', function (e) {
-            if (e.target.parentNode.className === 'modal-close-btn') {
+            console.log(e);
+            if (e.target.parentNode.className === 'modal-close-btn' || e.target.className === 'modal-close-btn') {
                 const $currentModal = $(`#${e.target.parentNode.id}`).parent();
                 $currentModal.hide();
                 $('.modal-container').hide();
@@ -44,7 +45,7 @@ fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location
             // If the previous button on modal was clicked
             if (e.target.className === 'modal-prev btn') {
                 const currentModal = $('#' + e.target.parentNode.parentNode.id);
-                const visableModals = modalsToShow(); //Gets which modals to display based on visable cards
+                const visableModals = modalsToDisplay(); //Gets which modals to display based on visable cards
                 let previousModal = '';
 
                 // Set what the previous Modal should be
@@ -63,7 +64,7 @@ fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location
                 // If the next button on modal clicked    
             } else if (e.target.className === 'modal-next btn') {
                 const currentModal = $('#' + e.target.parentNode.parentNode.id);
-                const visableModals = modalsToShow();
+                const visableModals = modalsToDisplay();
                 let nextModal = '';
                 // Set what the next Modal should be
                 $.each(visableModals, function (index, modal) {
@@ -84,13 +85,53 @@ fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location
         $('.search-input').on('keyup', function () {
             search();
         });
+        $('.search-input').on('search', function () {
+            search();
+        });
         $('form').on('submit', function (e) {
             e.preventDefault();
             search();
         });
     })
 
-function modalsToShow() {
+/**
+ * Function processData()
+ * Populates an array for cards and object for modals
+ * @param {array} data Results from fetch.
+ */
+function processData(data) {
+    $.each(data, (index, user) => {
+        userCards.push(generateCard(index, user));
+        userModals[`modal-${index + 1}`] = generateModal(index, user);
+    })
+}
+
+/**
+ * Function Search()
+ * Searchs names on cards and shows only names that match search.
+ */
+function search() {
+    const input = $('#search-input');
+    const search = input.val().toUpperCase();
+    const names = $('.card-info-container h3');
+
+    $.each(names, function (index, name) {
+        const textContent = name.textContent.toUpperCase();
+        const card = $('#' + name.parentElement.parentElement.id);
+
+        card.show();
+        if (!textContent.includes(search)) {
+            card.hide();
+        }
+    })
+}
+
+/**
+ * Function modalsToDisplay()
+ * Matches cards that are not hidden after search and builds array of strings with modal ids
+ * @return {array} - Array of modal ids
+ */
+function modalsToDisplay() {
     const modalsDisplayed = [];
     const cards = $('#gallery').children();
     $.each(cards, function (index, card) {
@@ -101,13 +142,9 @@ function modalsToShow() {
     return modalsDisplayed;
 }
 
-function processData(data) {
-    $.each(data, (index, user) => {
-        userCards.push(generateCard(index, user));
-        userModals[`modal-${index + 1}`] = generateModal(index, user);
-    })
-}
-
+/*
+    Generate and add HTML elements
+*/
 function loadGallery(data) {
     $.each(data, (index, userCard) => {
         $('#gallery').append(userCard);
@@ -117,7 +154,7 @@ function loadGallery(data) {
 function loadModalContainer(data) {
     $('#gallery').after(buildElement('div', undefined, 'modal-container'));
     $('.modal-container').hide();
-    console.log(data);
+
     $.each(data, (index, userModal) => {
         $('.modal-container').append(userModal);
         $(`#${index}`).hide();
@@ -249,6 +286,9 @@ function generateSearch() {
     searchDiv.append(form);
 }
 
+/*
+    Helper Functions
+*/
 function buildElement(element, id = '', classname = '', src = '', alt = '', action = '', method = '', type = '', placeholder = '', value = '') {
     const newElement = document.createElement(element); // create new element
 
@@ -274,41 +314,9 @@ function buildElement(element, id = '', classname = '', src = '', alt = '', acti
     return newElement; // return new element with parameters
 }
 
-// function buildElement2(element, ...attributes) {
-//     const newElement = document.createElement(element); // create new element
-
-
-
-//     // Iterate through parameters and add to the new element
-//     $.each(attributes, function (index, parameter) {
-//         $.each(parameter, function (key, value) {
-//             newElement.setAttribute(key, value);
-//         })
-//     });
-
-//     return newElement; // return new element with parameters
-// }
-
 function formatDate(date) {
 
     //Return formatted date of mm/dd/yyyy
     const formattedDate = date.replace(/(\d{4})-([0-1][0-3])-([0-3]\d{1})T[0-2]\d{1}:[0-5]\d{1}:[0-5]\d{1}Z/, "$2/$3/$1");
     return formattedDate;
-}
-
-function search() {
-
-    const input = $('#search-input');
-    const search = input.val().toUpperCase();
-    const names = $('.card-info-container h3');
-
-    $.each(names, function (index, name) {
-        const textContent = name.textContent.toUpperCase();
-        const card = $('#' + name.parentElement.parentElement.id);
-
-        card.show();
-        if (!textContent.includes(search)) {
-            card.hide();
-        }
-    })
 }
