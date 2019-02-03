@@ -22,6 +22,7 @@ function fetchData(url) {
 fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,DOB&nat=us&noinfo')
     .then(data => {
         userData = data.results;
+        generateSearch();
         processData(userData);
         loadGallery(userCards);
         loadModalContainer(userModals);
@@ -40,33 +41,65 @@ fetchData('https://randomuser.me/api/?results=12&inc=picture,name,email,location
             }
         });
         $('.modal-btn-container').on('click', function (e) {
-            console.log(e.target.className);
+            // If the previous button on modal was clicked
             if (e.target.className === 'modal-prev btn') {
                 const currentModal = $('#' + e.target.parentNode.parentNode.id);
+                const visableModals = modalsToShow(); //Gets which modals to display based on visable cards
+                let previousModal = '';
 
-                if (e.target.parentNode.parentNode.id === 'modal-1') {
-                    currentModal.hide();
-                    currentModal.parent().children().last().show();
-                } else {
-                    currentModal.hide();
-                    currentModal.prev().show();
-                }
-                // const currentModalParent = currentModal.prev();
-                // console.log(e.target.parentNode.parentNode.prev());
+                // Set what the previous Modal should be
+                $.each(visableModals, function (index, modal) {
+                    if (modal === e.target.parentNode.parentNode.id) {
+                        if (index === 0) {
+                            previousModal = visableModals[visableModals.length - 1];
+                        } else {
+                            previousModal = visableModals[index - 1]
+                        }
+                    }
+                });
+                //Hide the displayed modal and show the previous modal
+                currentModal.hide();
+                $('#' + previousModal).show();
+                // If the next button on modal clicked    
             } else if (e.target.className === 'modal-next btn') {
                 const currentModal = $('#' + e.target.parentNode.parentNode.id);
-
-                if (e.target.parentNode.parentNode.id === 'modal-12') {
-                    currentModal.hide();
-                    currentModal.parent().children().first().show();
-                } else {
-                    currentModal.hide();
-                    currentModal.next().show();
-                }
+                const visableModals = modalsToShow();
+                let nextModal = '';
+                // Set what the next Modal should be
+                $.each(visableModals, function (index, modal) {
+                    if (modal === e.target.parentNode.parentNode.id) {
+                        if (index === (visableModals.length - 1)) {
+                            nextModal = visableModals[0];
+                        } else {
+                            nextModal = visableModals[index + 1]
+                        }
+                    }
+                })
+                //Hide the displayed modal and show the next modal
+                currentModal.hide();
+                $('#' + nextModal).show();
             }
 
         });
+        $('.search-input').on('keyup', function () {
+            search();
+        });
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            search();
+        });
     })
+
+function modalsToShow() {
+    const modalsDisplayed = [];
+    const cards = $('#gallery').children();
+    $.each(cards, function (index, card) {
+        if (!(card.style.display === 'none')) {
+            modalsDisplayed.push(`modal-${card.id.substring(5)}`);
+        }
+    });
+    return modalsDisplayed;
+}
 
 function processData(data) {
     $.each(data, (index, user) => {
@@ -197,26 +230,85 @@ function generateModal(modalIndex, data) {
     return modalDiv;
 }
 
-function buildElement(element, id = '', classname = '', source = '', alt = '') {
-    newElement = document.createElement(element);
-    if (id) {
-        newElement.id = id;
-    }
-    if (classname) {
-        newElement.className = classname;
-    }
-    if (source) {
-        newElement.src = source;
-    }
-    if (alt) {
-        newElement.alt = alt;
-    }
-    return newElement;
+function generateSearch() {
+    //Select Search container
+    const searchDiv = $('.search-container');
+
+    //Create Form element
+    const form = buildElement('form', undefined, undefined, undefined, undefined, '#', 'get');
+
+    //create Search Input and append to Form
+    const searchInput = buildElement('input', 'search-input', 'search-input', undefined, undefined, undefined, undefined, 'search', 'Search...');
+    form.append(searchInput);
+
+    //Create Submit Input and append to form
+    const submitInput = buildElement('input', 'search-submit', 'search-submit', undefined, undefined, undefined, undefined, 'submit', undefined, 'Search');
+    form.append(submitInput);
+
+    //Append Form to Search Container
+    searchDiv.append(form);
 }
+
+function buildElement(element, id = '', classname = '', src = '', alt = '', action = '', method = '', type = '', placeholder = '', value = '') {
+    const newElement = document.createElement(element); // create new element
+
+    const parameters = { //Store parameters in object
+        id: id,
+        class: classname,
+        src: src,
+        alt: alt,
+        action: action,
+        method: method,
+        type: type,
+        placeholder: placeholder,
+        value: value
+    }
+
+    // Iterate through parameters and add to the new element
+    $.each(parameters, function (key, parameter) {
+        if (parameter) {
+            newElement.setAttribute(key, parameter);
+        }
+    });
+
+    return newElement; // return new element with parameters
+}
+
+// function buildElement2(element, ...attributes) {
+//     const newElement = document.createElement(element); // create new element
+
+
+
+//     // Iterate through parameters and add to the new element
+//     $.each(attributes, function (index, parameter) {
+//         $.each(parameter, function (key, value) {
+//             newElement.setAttribute(key, value);
+//         })
+//     });
+
+//     return newElement; // return new element with parameters
+// }
 
 function formatDate(date) {
 
     //Return formatted date of mm/dd/yyyy
     const formattedDate = date.replace(/(\d{4})-([0-1][0-3])-([0-3]\d{1})T[0-2]\d{1}:[0-5]\d{1}:[0-5]\d{1}Z/, "$2/$3/$1");
     return formattedDate;
+}
+
+function search() {
+
+    const input = $('#search-input');
+    const search = input.val().toUpperCase();
+    const names = $('.card-info-container h3');
+
+    $.each(names, function (index, name) {
+        const textContent = name.textContent.toUpperCase();
+        const card = $('#' + name.parentElement.parentElement.id);
+
+        card.show();
+        if (!textContent.includes(search)) {
+            card.hide();
+        }
+    })
 }
