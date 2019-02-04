@@ -359,7 +359,7 @@ function generateModal(modalIndex, data) {
     modalInfoDiv.append(cell);
 
     //Create address and append to Modal Info Container
-    const address = buildElement('p', undefined, 'modal-text');
+    const address = buildElement('p', undefined, 'modal-text cap');
     address.textContent = `${data.location.street} ${data.location.city}, ${data.location.state} ${data.location.postcode}`;
     modalInfoDiv.append(address);
 
