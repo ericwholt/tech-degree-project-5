@@ -47,9 +47,7 @@ fetchRandomUser('https://randomuser.me/api/?results=12&inc=picture,name,email,lo
         cardClickedHandler();
         modalCloseButtonClickedHandler();
         modalButtonContainerClickedHandler();
-        searchKeyupHandler();
-        searchOnSearchHandler();
-        searchButtonHandler();
+        searchHandler();
     })
 
 /**
@@ -60,7 +58,7 @@ fetchRandomUser('https://randomuser.me/api/?results=12&inc=picture,name,email,lo
 function processData(data) {
     $.each(data, (index, user) => {
         userCards.push(generateCard(index, user));
-        userModals[`modal-${index + 1}`] = generateModal(index, user);
+        userModals[`modal-${ index + 1 }`] = generateModal(index, user);
     })
 }
 
@@ -75,12 +73,12 @@ function processData(data) {
  */
 function cardClickedHandler() {
     $('.card').on('click', function (e) {
-        const currentModal = $(`#${e.currentTarget.id.replace('card', 'modal')}`); // Select the modal based on card clicked
+        const currentModal = $(`#${ e.currentTarget.id.replace('card', 'modal') }`); // Select the modal based on card clicked
         const visableModals = modalsToDisplay() // get list of modals that are visable based on cards that are visable
 
         // Ensure All modals hidden before showing currentModal and All modals show previous and next buttons
         $.each($('.modal-container').children(), (index, modal) => {
-            const $modalObject = $(`#${modal.id}`);
+            const $modalObject = $(`#${ modal.id }`);
 
             $modalObject.children().last().show();
             $modalObject.hide();
@@ -135,7 +133,7 @@ function modalButtonContainerClickedHandler() {
 
             //Hide the displayed modal and show the previous modal
             currentModal.hide();
-            $(`#${previousModal}`).show();
+            $(`#${ previousModal }`).show();
         } else if (e.target.className === 'modal-next btn') // If the next button on modal clicked    
         {
             let nextModal = '';
@@ -151,39 +149,18 @@ function modalButtonContainerClickedHandler() {
             })
             //Hide the displayed modal and show the next modal
             currentModal.hide();
-            $(`#${nextModal}`).show();
+            $(`#${ nextModal }`).show();
         }
 
     });
 }
 
 /**
- * Function searchKeyupHandler()
- * Handles keyup events and calls search function
+ * Function searchHandler()
+ * Handles keyup, search, and submit events and calls search function
  */
-function searchKeyupHandler() {
-    $('.search-input').on('keyup', function () {
-        search();
-    });
-}
-
-/**
- * Function searchOnSearchHandler()
- * Handles OnSearch events and calls search function
- */
-function searchOnSearchHandler() {
-    $('.search-input').on('search', function () {
-        search();
-    });
-}
-
-/**
- * Function searchButtonHandler()
- * Handles Search Button submit events, prevents default to refresh page, and calls search function
- */
-function searchButtonHandler() {
-    $('form').on('submit', function (e) {
-        e.preventDefault();
+function searchHandler() {
+    $('.search-input').on('keyup search submit', function () {
         search();
     });
 }
@@ -222,7 +199,7 @@ function modalsToDisplay() {
         //Check if card display is not set to none
         if (!(card.style.display === 'none')) {
             //We trim the card- from id and replace with modal-. Then add modal ID to array of corresponding card id. 
-            modalsDisplayed.push(`modal-${card.id.substring(5)}`);
+            modalsDisplayed.push(`modal-${ card.id.substring(5) }`);
         }
     });
     //return an array of modal ids strings that are visable based on cards that are visable
@@ -264,7 +241,7 @@ function addUserModalsToModalContainer(data) {
 
     $.each(data, (index, userModal) => {
         $('.modal-container').append(userModal);
-        $(`#${index}`).hide();
+        $(`#${ index }`).hide();
     })
 }
 
@@ -281,7 +258,7 @@ function addUserModalsToModalContainer(data) {
  */
 function generateCard(cardIndex, data) {
     // Create Card Div   
-    const cardDiv = buildElement('div', `card-${cardIndex + 1}`, 'card');
+    const cardDiv = buildElement('div', `card-${ cardIndex + 1 }`, 'card');
 
     //Create Card Image and Card Info Containers
     const cardImgDiv = buildElement('div', undefined, 'card-img-container');
@@ -293,17 +270,17 @@ function generateCard(cardIndex, data) {
 
     //Create h3 and append to Card Info Container
     const h3 = buildElement('h3', 'name', 'card-name cap');
-    h3.textContent = `${data.name.first} ${data.name.last}`;
+    h3.textContent = `${ data.name.first } ${ data.name.last }`;
     cardInfoDiv.append(h3);
 
     //Create email and append to Card Info Container
     const email = buildElement('p', undefined, 'card-text');
-    email.textContent = `${data.email}`;
+    email.textContent = `${ data.email }`;
     cardInfoDiv.append(email);
 
     //Create location and append to Card Info Container
     const location = buildElement('p', undefined, 'card-text cap');
-    location.textContent = `${data.location.city}`;
+    location.textContent = `${ data.location.city }`;
     cardInfoDiv.append(location);
 
     //Append Card Image Container and Card Info Container to Card Div
@@ -321,10 +298,10 @@ function generateCard(cardIndex, data) {
  */
 function generateModal(modalIndex, data) {
     //Create Modal Div
-    const modalDiv = buildElement('div', `modal-${modalIndex + 1}`, 'modal');
+    const modalDiv = buildElement('div', `modal-${ modalIndex + 1 }`, 'modal');
 
     //Create button and append to Modal Div
-    const modalButton = buildElement('button', `modal-${modalIndex + 1}-close-btn`, 'modal-close-btn');
+    const modalButton = buildElement('button', `modal-${ modalIndex + 1 }-close-btn`, 'modal-close-btn');
     modalButton.innerHTML = '<strong>X</strong>';
     modalDiv.append(modalButton);
 
@@ -332,22 +309,22 @@ function generateModal(modalIndex, data) {
     const modalInfoDiv = buildElement('div', undefined, 'modal-info-container');
 
     //Create image and append to Modal Info Container
-    const img = buildElement('img', undefined, 'modal-img', `${data.picture.large}`, 'profile picture')
+    const img = buildElement('img', undefined, 'modal-img', `${ data.picture.large }`, 'profile picture')
     modalInfoDiv.append(img);
 
     //Create h3 and append to Modal Info Container
     const h3 = buildElement('h3', 'name', 'card-name cap');
-    h3.textContent = `${data.name.first} ${data.name.last}`;
+    h3.textContent = `${ data.name.first } ${ data.name.last }`;
     modalInfoDiv.append(h3);
 
     //Create email and append to Modal Info Container
     const email = buildElement('p', undefined, 'modal-text');
-    email.textContent = `${data.email}`;
+    email.textContent = `${ data.email }`;
     modalInfoDiv.append(email);
 
     //Create location and append to Modal Info Container
     const location = buildElement('p', undefined, 'modal-text cap');
-    location.textContent = `${data.location.city}`;
+    location.textContent = `${ data.location.city }`;
     modalInfoDiv.append(location);
 
     //Create horizontal line and append to Modal Info Container
@@ -355,18 +332,18 @@ function generateModal(modalIndex, data) {
 
     //Create cell and append to Modal Info Container
     const cell = buildElement('p', undefined, 'modal-text');
-    cell.textContent = `${data.cell}`;
+    cell.textContent = `${ data.cell }`;
     modalInfoDiv.append(cell);
 
     //Create address and append to Modal Info Container
     const address = buildElement('p', undefined, 'modal-text cap');
-    address.textContent = `${data.location.street} ${data.location.city}, ${data.location.state} ${data.location.postcode}`;
+    address.textContent = `${ data.location.street } ${ data.location.city }, ${ data.location.state } ${ data.location.postcode }`;
     modalInfoDiv.append(address);
 
     //Create birthday and append to Modal Info Container
     const birthday = buildElement('p', undefined, 'modal-text');
     const date = formatDate(data.dob.date)
-    birthday.textContent = `Birthday: ${date}`;
+    birthday.textContent = `Birthday: ${ date }`;
     modalInfoDiv.append(birthday);
 
     //Append Modal Info Container to Modal Div
@@ -376,12 +353,12 @@ function generateModal(modalIndex, data) {
     const modalBtnDiv = buildElement('div', undefined, 'modal-btn-container');
 
     //Create Modal Previous Button and append to Modal Button Container
-    const modalPrevButton = buildElement('button', `modal-${modalIndex + 1}-prev`, 'modal-prev btn');
+    const modalPrevButton = buildElement('button', `modal-${ modalIndex + 1 }-prev`, 'modal-prev btn');
     modalPrevButton.textContent = 'Prev';
     modalBtnDiv.append(modalPrevButton);
 
     //Create Modal Next Button and append to Modal Button Container
-    const modalNextButton = buildElement('button', `modal-${modalIndex + 1}-next`, 'modal-next btn');
+    const modalNextButton = buildElement('button', `modal-${ modalIndex + 1 }-next`, 'modal-next btn');
     modalNextButton.textContent = 'Next';
     modalBtnDiv.append(modalNextButton);
 
